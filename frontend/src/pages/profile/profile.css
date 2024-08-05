@@ -1,0 +1,47 @@
+.profile-content{
+    width: 1200px;
+    margin-inline: auto;
+}
+
+.pPhotoProfile{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 150px;
+    height: 150px;
+    margin: auto;
+}
+
+.pPhotoProfile img{
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 9999px;
+    border: 3px solid black;
+}
+
+.pInfoProfile{
+    display: flex;
+    gap: 50px;
+    padding: 0 20px;
+}
+.pInfoProfile span{
+    font-weight: 600;
+}
+
+.pInfoEdit{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+.pInfoEdit button{
+    cursor: pointer;
+    background: white;
+    font-size: 16px;
+    padding: 2px 10px;
+    border: 1px solid black;
+    border-radius: 20px;
+}

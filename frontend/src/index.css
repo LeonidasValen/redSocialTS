@@ -1,0 +1,30 @@
+*{
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body{
+  font-family: sans-serif;
+  min-height: 100dvh;
+}
+
+img{
+  max-height: 100%;
+}
+
+a{
+  text-decoration: none;
+}
+
+p{
+  text-wrap: pretty;
+}
+
+h1,h2,h3,h4,h5{
+  text-wrap: balance;
+}
+
+ul{
+  list-style: none;
+}

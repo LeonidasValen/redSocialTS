@@ -1,0 +1,6 @@
+.table-users{
+    margin: 2rem;
+    border: 1px solid #c9c9c9;
+    box-shadow: rgba(145, 158, 171, 0.08) 0px 0px 2px 0px, rgba(145, 158, 171, 0.08) 0px 12px 24px -4px;
+    border-radius: 10px;
+}

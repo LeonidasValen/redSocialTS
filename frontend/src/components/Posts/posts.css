@@ -1,0 +1,131 @@
+.postConetent {
+    display: flex;
+    background: #fff;
+    padding: .5rem;
+    border-radius: 10px;
+    box-shadow: 0px 2px 5px #1e1e1e55;
+    width: 100%;
+}
+
+.pContent{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.pHeader{
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: .4rem;
+    margin-top: .8rem;
+}
+
+.pUser{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pUser span{
+    font-weight: 600;
+    font-size: 16px;
+    margin-right: 4px;
+}
+.pUser p{
+    font-size: 14px;
+    color: rgb(70, 70, 70);
+}
+
+.pOptions{
+    position: absolute;
+    right: 0;
+    top: -2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    outline: none;
+    border: 0;
+    cursor: pointer;
+    border-radius: 50%;
+    padding: 3px;
+}
+.pOptions:hover{
+    background: #00b4ff45;
+    color: #006eed;
+}
+
+.pProfile img{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin: 10px;
+    cursor: pointer;
+}
+
+.pcImg{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    margin-top: 0.5rem;
+}
+
+.pcImg img{
+    width: 100%;
+    height: 100%;
+    max-height: 510px;
+    border: 3px solid #1c96cb;
+    border-radius: 10px;
+    object-fit: cover;
+}
+
+.pcImg.colum img{
+    min-height: 240px;
+    max-height: 240px;
+    min-width: 260px;
+    max-width: 260px;
+}
+
+.pButtons{
+    display: flex;
+    justify-content: space-evenly;
+    margin-block: .2rem;
+}
+
+.pButtons button{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    outline: none;
+    border: 0;
+    border-radius: 50%;
+    padding: 4px;
+    transition: .2s;
+    cursor: pointer;
+}
+
+.pButtons .bHeart:hover{
+    background: #ff005047;
+    color: #ed0058;
+}
+.pButtons .bHeart.liked{
+    color: #ed0058;
+}
+.pButtons .bComment:hover{
+    background: #00b4ff45;
+    color: #006eed;
+}
+.pButtons .bReshare:hover{
+    background: #1ef45c45;
+    color: #15a019;
+}
+.pButtons .bShare:hover{
+    background: #0ca5f345;
+    color: #0b4ccc;
+}
