@@ -9,11 +9,13 @@ export default defineConfig({
     proxy: {
       '/auth': {
         target: 'http://localhost:8000',
+        rewrite: (path) => path.replace(/^\/auth/, '/auth'),
         changeOrigin: true,
         secure: false,
       },
       '/user': {
         target: 'http://localhost:8000',
+        rewrite: (path) => path.replace(/^\/user/, '/user'),
         changeOrigin: true,
         secure: false,
       },

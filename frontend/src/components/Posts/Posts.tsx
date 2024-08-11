@@ -52,7 +52,7 @@ export function Posts() {
         });
         setLikeCounts(updatedPostStates);
     }, [posts]);
-    
+
     const handleLike = async (postId: number) => {
         if (!isAuthenticated && user) {
             navigate('/login')
@@ -104,7 +104,10 @@ export function Posts() {
                     posts.map((post: Post) => (
                         <div className='postConetent' key={post.postId}>
                             <div className="pProfile">
-                                <img src={`./img/${post.userPhoto}`} alt="" />
+                                {post?.userPhoto
+                                    ? <img src={`./img/${post.userPhoto}`} alt="" />
+                                    : <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-user-color-icon.png" alt="" />
+                                }
                             </div>
                             <div className='pContent'>
                                 <div className="pHeader">

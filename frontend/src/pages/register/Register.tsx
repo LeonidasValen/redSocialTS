@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/authContext'
+import { IconEye, IconEyeClose } from '../../../public/icons/icons';
 import './register.css'
 
 interface FormData {
@@ -20,6 +21,8 @@ export function Register() {
   const { signUp } = useAuth()
 
   const navigate = useNavigate()
+
+  const [eye, setEye] = useState(false)//estado para ver la contraseña
 
   const [errors, setErrors] = useState<Errors>({})//errores del cliente con el formulario
   const [errorBackend, setErrorBackend] = useState<string[]>([])//errores traidos del backend
@@ -63,14 +66,13 @@ export function Register() {
 
     try {
       await signUp(formData)
-      navigate("/")
+      navigate("/login")
     } catch (error: any) {
       //console.error(error)
       setErrors({ general: error?.response?.data?.message || "Error al iniciar sesión, por favor inténtelo de nuevo" })
       setErrorBackend(error.response?.data?.error || [])
     }
   }
-  console.log(errorBackend)
 
   return (
     <div className='formContent'>
@@ -88,7 +90,15 @@ export function Register() {
             errors.email && <p className="rError">{errors.email}</p>
           }
           <label htmlFor="password">Contraseña</label>
-          <input type="password" placeholder='Contraseña' name="password" onChange={handleChange} />
+          <div className='inputPassword'>
+            <input type={eye ? 'text' : 'password'} placeholder='Contraseña' name="password" onChange={handleChange} />
+            <button className='pEye' onClick={(e)=>{ e.preventDefault(); setEye(!eye)}}>
+              { eye 
+                ?<IconEyeClose />
+                : <IconEye/>
+              }
+            </button>
+          </div>
           {
             errors.password && <p className="rError">{errors.password}</p>
           }

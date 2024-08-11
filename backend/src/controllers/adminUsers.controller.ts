@@ -5,13 +5,20 @@ import { RowDataPacket } from "mysql2/promise";
 import path from "path";
 import fs from 'fs/promises';
 
-interface User extends RowDataPacket {
+interface ExistingUser extends RowDataPacket {
     id: number;
     photo: string | null;
     username: string;
     email: string;
     rol: string;
     f_creation: Date;
+}
+interface ExistingUserId extends RowDataPacket {
+    id: number;
+}
+interface ExistingUserDelete extends RowDataPacket {
+    id: number;
+    photo: string | null;
 }
 
 interface UserCount extends RowDataPacket {
@@ -34,7 +41,7 @@ export const getUsers = async (req: UserIdInterface, res: Response): Promise<voi
         db = await connectToDB();
 
         // devulven todos los usuarios registrados
-        const [users] = await db.query<User[]>("SELECT id, photo, username, email, rol, f_creation FROM user WHERE id != ? AND username LIKE ?  LIMIT ? OFFSET ?", [userId, `%${searchUser}%`, parsedLimit, offset]);
+        const [users] = await db.query<ExistingUser[]>("SELECT id, photo, username, email, rol, f_creation FROM user WHERE id != ? AND username LIKE ?  LIMIT ? OFFSET ?", [userId, `%${searchUser}%`, parsedLimit, offset]);
         // Consulta para obtener el total de usuarios
         const [[{ total }]] = await db.query<UserCount[]>(
             "SELECT COUNT(*) AS total FROM user WHERE id != ? AND username LIKE ?",
@@ -65,7 +72,7 @@ export const updateUser = async (req: UserIdInterface, res: Response): Promise<v
         // Conectar a la base de datos
         db = await connectToDB();
 
-        const [userUpdate] = await db.query<User[]>("SELECT id FROM user WHERE id = ?", [userId]);
+        const [userUpdate] = await db.query<ExistingUserId[]>("SELECT id FROM user WHERE id = ?", [userId]);
         if (userUpdate.length === 0) {
             res.status(404).json({ message: 'Usuario no encontrado' });
             return
@@ -109,7 +116,7 @@ export const deleteUser = async (req: UserIdInterface, res: Response): Promise<v
         db = await connectToDB();
 
         // Verificar si el usuario existe
-        const [userDelete] = await db.query<User[]>("SELECT id, photo FROM user WHERE id = ?", [userId]);
+        const [userDelete] = await db.query<ExistingUserDelete[]>("SELECT id, photo FROM user WHERE id = ?", [userId]);
         if (userDelete.length === 0) {
             res.status(404).json({ message: 'Usuario no encontrado' });
             return

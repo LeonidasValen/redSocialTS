@@ -34,12 +34,12 @@ export function Navbar() {
                             <>
                                 <li className='nProfile'>
                                     {user?.photo
-                                        ? <img src={`./img/${user?.photo}`} alt="" />
+                                        ? <img src={`/./img/${user?.photo}`} alt="" />
                                         : <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-user-color-icon.png" alt="" />
                                     }
                                 </li>
                                 <li>
-                                    <Link to={'/profile'}>{user?.username}</Link>
+                                    <Link to={`/profile/${user?.id}`}>{user?.username}</Link>
                                 </li>
                                 {user?.rol === 'Admin' &&
                                     <li>

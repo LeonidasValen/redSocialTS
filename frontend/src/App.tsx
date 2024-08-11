@@ -6,6 +6,7 @@ import { Register } from './pages/register/Register'
 import { Login } from './pages/login/Login'
 import { Profile } from './pages/profile/Profile'
 import { AdminPanel } from './pages/admin/AdminPanel'
+import { Verifyemail } from './pages/register/Verify-email'
 
 function App() {
   const router = createBrowserRouter([
@@ -19,7 +20,7 @@ function App() {
           element: <Home />
         },
         {
-          path: '/profile',
+          path: '/profile/:userId',
           element: <Profile/>
         },
         {
@@ -35,7 +36,11 @@ function App() {
     {
       path: '/login',
       element: <Login/>
-    }
+    },
+    {
+      path: '/verify-email',
+      element: <Verifyemail/>
+    },
   ])
 
 

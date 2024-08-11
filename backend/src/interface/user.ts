@@ -10,8 +10,8 @@ export interface UserIdInterface extends Request {
 export interface UserResultInterface extends RowDataPacket {
     id: number;
     photo: string;
-    email: string;
-    password: string;
     username: string;
+    email: string;
     rol: string;
+    password: string;
 }

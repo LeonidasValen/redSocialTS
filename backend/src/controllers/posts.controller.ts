@@ -19,6 +19,11 @@ interface PostRow extends RowDataPacket {
     hasLiked: number;
 }
 
+interface PostId extends RowDataPacket {
+    postId: number;
+    userId: number;
+}
+
 export const post = async (req: UserIdInterface, res: Response): Promise<void> => {
     const userId = req.user?.userId;
     const descrip = req.body.descrip;
@@ -58,6 +63,60 @@ export const post = async (req: UserIdInterface, res: Response): Promise<void> =
 
 export const getPosts = async (req: UserIdInterface, res: Response): Promise<void> => {
     const userId = req.user?.userId || null; // Si el usuario está autenticado, obtiene su ID
+    let db;
+    try {
+        db = await connectToDB();
+
+        const [results] = await db.query<PostRow[]>(`
+            SELECT 
+                posts.id AS postId, 
+                posts.desc, 
+                posts.userId,
+                posts.creationAt,
+            GROUP_CONCAT(DISTINCT imgposts.img) AS images, 
+                user.username, 
+                user.photo,
+            COUNT(DISTINCT likes.id) AS likeCount,
+            MAX(likes.userId = ?) AS hasLiked
+            FROM 
+                posts
+            LEFT JOIN 
+                imgposts ON posts.id = imgposts.postId
+            INNER JOIN 
+                user ON posts.userId = user.id
+            LEFT JOIN 
+                likes ON posts.id = likes.postId
+            GROUP BY 
+                posts.id, posts.desc, posts.userId, posts.creationAt, user.username, user.photo
+            ORDER BY 
+                posts.creationAt DESC;
+        `, [userId]);
+
+        const posts = results.map(row => ({
+            postId: row.postId,
+            desc: row.desc,
+            creationAt: row.creationAt,
+            userId: row.userId,
+            username: row.username,
+            userPhoto: row.photo,
+            images: row.images ? row.images.split(',') : [],
+            likeCount: row.likeCount,
+            hasLiked: Boolean(row.hasLiked) // Convertir 0 o 1 a booleano
+        }));
+
+        res.status(200).json(posts);
+
+    } catch (error) {
+        console.error('Error al traer los posts con likes:', error);
+        res.status(500).json({ message: 'Error en el servidor al obtener los posts con likes' });
+    } finally {
+        if (db) db.release();
+    }
+}
+
+//trae el post de un usuario
+export const getPostsUsers = async (req: UserIdInterface, res: Response): Promise<void> => {
+    const userId = req.user?.userId; // Si el usuario está autenticado, obtiene su ID
     let db;
     try {
         db = await connectToDB();
@@ -149,13 +208,13 @@ export const dislike = async (req: UserIdInterface, res: Response): Promise<void
     try {
         db = await connectToDB();
 
-        const [post] = await db.query<PostRow[]>("SELECT id FROM posts WHERE id = ?", [postId]);
+        const [post] = await db.query<PostId[]>("SELECT id FROM posts WHERE id = ?", [postId]);
         if (post.length === 0) {
             res.status(400).json({ message: "El post no existe" });
             return
         }
 
-        const [liked] = await db.query<PostRow[]>("SELECT userId, postId FROM likes WHERE userId = ? AND postId = ?", [userId, postId]);
+        const [liked] = await db.query<PostId[]>("SELECT userId, postId FROM likes WHERE userId = ? AND postId = ?", [userId, postId]);
         if (liked.length === 0) {
             res.status(400).json({ message: "El post no está likeado" });
             return

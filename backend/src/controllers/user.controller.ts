@@ -1,9 +1,17 @@
 import connectToDB from "../db/db";
-import { Response } from "express";
-import { UserIdInterface, UserResultInterface } from "../interface/user";
+import { Request, Response } from "express";
+import { UserIdInterface } from "../interface/user";
 import { RowDataPacket } from "mysql2";
 import fs from 'fs/promises';
 import path from "path";
+
+export interface UserResult extends RowDataPacket {
+    id: number;
+    photo: string;
+    username: string;
+    email: string;
+    rol: string;
+}
 
 interface ExistingUser extends RowDataPacket {
     email: string;
@@ -17,11 +25,36 @@ export const getUser = async (req: UserIdInterface, res: Response): Promise<void
     try {
         //trae el id del usurio del validateToken
         const userId = req.user?.userId
-        if (!userId) { res.status(401).json({ message: 'No estas autorizado' }); return; }
 
         db = await connectToDB()
         // Verificar si se encontro al usuario
-        const [userSql] = await db.query<UserResultInterface[]>("SELECT id, photo, username, email, rol FROM user WHERE id = ?", [userId]);
+        const [userSql] = await db.query<UserResult[]>("SELECT id, photo, username, email, rol FROM user WHERE id = ?", [userId]);
+        if (userSql.length === 0) {
+            res.status(404).json({ message: 'Usuario no encontrado' });
+            return
+        }
+        // Extraer los datos del usuario y enviar la respuesta
+        const user = userSql[0];
+
+        res.status(200).json({ user });
+    } catch (error) {
+        console.error('Error al obtener usuario:', error);
+        res.status(500).json({ message: 'Error al obtener usuario', });
+    } finally {
+        if (db) { db.release(); }
+    }
+}
+
+export const getProfile = async (req: Request, res: Response): Promise<void> => {
+    //trae el id del usurio del validateToken
+    const userId = req.params.id
+    console.log(userId)
+    let db;
+    try {
+
+        db = await connectToDB()
+        // Verificar si se encontro al usuario
+        const [userSql] = await db.query<UserResult[]>("SELECT id, photo, username, email, rol FROM user WHERE id = ?", [userId]);
         if (userSql.length === 0) {
             res.status(404).json({ message: 'Usuario no encontrado' });
             return

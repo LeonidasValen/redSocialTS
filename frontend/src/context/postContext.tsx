@@ -58,8 +58,8 @@ export const PostProvider: React.FC<PostProvider> = ({ children }) => {
         await postLikes(postId)
     }
     const removeLike = async (postId: number) => {
-        const res = await disLike(postId)
-        console.log(res)
+        await disLike(postId)
+        //console.log(res)
     }
 
     const savePost = async (value: FormData) => {

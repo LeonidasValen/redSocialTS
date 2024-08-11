@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Response } from "express";
 import connectToDB from "../db/db";
 import { RowDataPacket } from "mysql2/promise";
 import { UserIdInterface } from "../interface/user";

@@ -28,14 +28,14 @@ export const register = async (req: Request, res: Response, next: NextFunction):
         if (existingUser.length > 0) {
             const user = existingUser[0];
             if (user.email === email && user.username === username) {
-                res.status(409).json({ message: "El Correo y el Nombre del usuario ya están registrados" })
-                return
+                res.status(409).json({ message: "El Correo y el Nombre del usuario ya están registrados" });
+                return;
             } else if (user.email === email) {
-                res.status(409).json({ message: "El Correo ya están registrados" })
-                return
-            } else if (user.email === email) {
-                res.status(409).json({ message: "El Correo ya están registrados" })
-                return
+                res.status(409).json({ message: "El Correo ya está registrado" });
+                return;
+            } else if (user.username === username) {
+                res.status(409).json({ message: "El Nombre de usuario ya está registrado" });
+                return;
             }
         }
 
@@ -43,16 +43,16 @@ export const register = async (req: Request, res: Response, next: NextFunction):
         const hash = await bcrypt.hash(password, 12)
 
         //insercion de los datos
-        await db.query("INSERT INTO user (username, email, password) VALUES (?, ?, ?)", [email, username, hash])
+        await db.query("INSERT INTO user (username, email, password) VALUES (?, ?, ?)", [username, email, hash]);
 
-        //crea un token
+        // Crea un token de verificación
         const verificationToken = Math.random().toString(36).substring(2, 15);
-        //guarda el token de la persoan que se registro
-        await db.query("UPDATE user SET verify_token = ? WHERE email = ?", [verificationToken, email])
-        //envia para verificar el token al validateEmail.js
+        await db.query("UPDATE user SET verify_token = ? WHERE email = ?", [verificationToken, email]);
+
+        // Envía el token para la verificación
         req.body.verificationToken = verificationToken;
         req.body.email = email;
-        next()
+        next();
 
     } catch (error) {
         console.log(error)
@@ -83,7 +83,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         }
         //crea la cookie
         const token = await createJWT({ userId: user.id })
-        res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'strict' })//envia la cookie con los metodos de seguridad
+        res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 7*24*60*60*1000 })//envia la cookie con los metodos de seguridad
 
         res.status(201).json({
             id: user.id,
@@ -114,18 +114,19 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
 
 //Verifica el email del usuario
 export const verifyEmail = async (req: Request, res: Response): Promise<void> => {
-    const { token, email } = req.body;
+    const { token } = req.body;
+
     let db;
     try {
         db = await connectToDB();
         //verifica que mail y el token existan
-        const [user] = await db.query<TokenResult[]>("SELECT verify_token, email FROM user WHERE verify_token = ? AND email = ?", [token, email]);
+        const [user] = await db.query<TokenResult[]>("SELECT verify_token, email FROM user WHERE verify_token = ? ", [token]);
         if (user.length === 0) {
             res.status(400).json({ message: "Token inválido" });
             return
         }
         //actualiza el token y valida el usuario
-        await db.query("UPDATE user SET rol = 'Verify', verify_token = NULL WHERE verify_token = ? AND email = ?", [token, email]);
+        await db.query("UPDATE user SET rol = 'Verify', verify_token = NULL WHERE verify_token = ?", [token]);
 
         res.status(200).json({ message: 'Email verificado correctamente' });
     } catch (error) {

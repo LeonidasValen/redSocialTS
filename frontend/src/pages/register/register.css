@@ -38,6 +38,28 @@
     border-radius: 4px;
 }
 
+.inputPassword{
+    display: flex;
+    position: relative;
+    width: 100%;
+}
+.inputPassword input{
+    width: 100%;
+}
+.inputPassword .pEye{
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    width: 24px;
+    right: 0;
+    margin-right: 5px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
 .bSubmit{
     border: 1px solid #0e7ad8;
     background: #0e7ad8;
