@@ -9,11 +9,11 @@ import { PostProvider } from './context/postContext.tsx'
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <AuthProvider>
-      <PostProvider>
-        <AdminProvider>
-          <App />
-        </AdminProvider>
-      </PostProvider>
+        <PostProvider>
+          <AdminProvider>
+            <App />
+          </AdminProvider>
+        </PostProvider>
     </AuthProvider>
   </React.StrictMode>,
 )

@@ -1,16 +1,18 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { getUser, loginRequest, logoutRequest, registerRequest, updateRequest, verifyToken } from "../api/auth";
-
+import { loginRequest, logoutRequest, registerRequest, verifyToken } from "../api/auth";
+import { getProfiles, getUser, updateRequest } from "../api/user";
 
 interface AuthContextProps {
     loading: boolean;
     isAuthenticated: boolean;
     user: User | null;
+    userProfile: Profile| null;
     signUp: (user: Partial<User>) => Promise<void>;
     verifyEmail: (token: string) => Promise<void>;
     signIn: (user: Partial<User>) => Promise<void>;
     logout: () => Promise<void>;
     updateUser: (user: Partial<User>, id: number) => Promise<void>;
+    getProfile: (userId: number) => Promise<void>;
     checkLogin: () => Promise<void>;
 }
 
@@ -19,6 +21,13 @@ interface User {
     email: string;
     photo: string | null;
     rol: string;
+    username: string;
+}
+
+interface Profile{
+    id: number;
+    email: string;
+    photo: string | null;
     username: string;
 }
 
@@ -42,19 +51,20 @@ export const AuthProvider: React.FC<AuthProviderProp> = ({ children }) => {
     const [isAuthenticated, setAuthenticated] = useState(false);
     const [user, setUser] = useState<User | null>(null)
 
-    //Register
+    const [userProfile, setUserProfile] = useState<Profile | null>(null)
+
+    // <-- AUTH -->
+
     const signUp = async (user: Partial<User>) => {
         await registerRequest(user)
         //console.log(ress)
     }
 
-    //Verifica el correo
     const verifyEmail = async (token: string) => {
         await verifyToken(token)
         //console.log(res)
     }
 
-    //login
     const signIn = async (user: Partial<User>) => {
         const res = await loginRequest(user)
         //console.log(res)
@@ -70,10 +80,18 @@ export const AuthProvider: React.FC<AuthProviderProp> = ({ children }) => {
         localStorage.removeItem('session_username');
     }
 
-    // Actualizar usuario
+    // <-- USER -->
+
+    // Actualizar perfil usuario
     const updateUser = async (user: Partial<User>, id: number) => {
         await updateRequest(user, id);
         //console.log(res)
+    }
+
+    //trae el perfil del usuario
+    const getProfile = async(userId: number)=>{
+        const res = await getProfiles(userId)
+        setUserProfile(res.data.user)
     }
 
     const checkLogin = async () => {
@@ -112,7 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProp> = ({ children }) => {
     }
 
     return (
-        <AuthContext.Provider value={{ loading, isAuthenticated, user, signUp, verifyEmail, signIn, logout, updateUser, checkLogin }}>
+        <AuthContext.Provider value={{ loading, isAuthenticated, user, userProfile, signUp, verifyEmail, signIn, logout, updateUser, getProfile, checkLogin }}>
             {children}
         </AuthContext.Provider>
     )

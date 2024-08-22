@@ -1,7 +1,7 @@
 import { ResultSetHeader, RowDataPacket } from "mysql2/promise";
 import connectToDB from "../db/db";
 import { UserIdInterface } from "../interface/user";
-import { Response } from "express";
+import { Request, Response } from "express";
 
 interface ExistingUser extends RowDataPacket {
     id: number;
@@ -101,7 +101,7 @@ export const getPosts = async (req: UserIdInterface, res: Response): Promise<voi
             userPhoto: row.photo,
             images: row.images ? row.images.split(',') : [],
             likeCount: row.likeCount,
-            hasLiked: Boolean(row.hasLiked) // Convertir 0 o 1 a booleano
+            hasLiked: Boolean(row.hasLiked) // Convierte 0 o 1 a booleano
         }));
 
         res.status(200).json(posts);
@@ -116,8 +116,13 @@ export const getPosts = async (req: UserIdInterface, res: Response): Promise<voi
 
 //trae el post de un usuario
 export const getPostsUsers = async (req: UserIdInterface, res: Response): Promise<void> => {
-    const userId = req.user?.userId; // Si el usuario está autenticado, obtiene su ID
+    const userIdProfile = req.params?.id; // Si el usuario está autenticado, obtiene su ID
+    const userId = req.user?.userId || null; 
     let db;
+    if (!userIdProfile) {
+        res.status(400).json({ message: 'El ID del perfil no es valido' });
+        return;
+    }
     try {
         db = await connectToDB();
 
@@ -140,11 +145,13 @@ export const getPostsUsers = async (req: UserIdInterface, res: Response): Promis
                 user ON posts.userId = user.id
             LEFT JOIN 
                 likes ON posts.id = likes.postId
+            WHERE
+                posts.userId = ?
             GROUP BY 
                 posts.id, posts.desc, posts.userId, posts.creationAt, user.username, user.photo
             ORDER BY 
-                posts.creationAt DESC;
-        `, [userId]);
+                posts.creationAt DESC ;
+        `, [userId, userIdProfile]);
 
         const posts = results.map(row => ({
             postId: row.postId,
@@ -155,7 +162,7 @@ export const getPostsUsers = async (req: UserIdInterface, res: Response): Promis
             userPhoto: row.photo,
             images: row.images ? row.images.split(',') : [],
             likeCount: row.likeCount,
-            hasLiked: Boolean(row.hasLiked) // Convertir 0 o 1 a booleano
+            hasLiked: Boolean(row.hasLiked) // Convierte 0 o 1 a booleano
         }));
 
         res.status(200).json(posts);

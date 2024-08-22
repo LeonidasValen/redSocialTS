@@ -1,12 +1,11 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-import { disLike, getPosts, postLikes, savedPost } from "../api/post";
+import { disLike, getPosts, getPostsProfiles, postLikes, savedPost } from "../api/post";
 
 interface PostContextProps {
     posts: Post[];
     loading: boolean;
-    // likes: Record<number, boolean>;
-    // setLikes: (likes: Record<number, boolean>) => void;
     getPost: () => Promise<void>;
+    getPostProfile: (userId: number) => Promise<void>;
     saveLike: (postId: number) => Promise<void>;
     removeLike: (postId: number) => Promise<void>;
     savePost: (value: FormData) => Promise<void>;
@@ -14,6 +13,7 @@ interface PostContextProps {
 
 interface Post {
     postId: number;
+    userId: number;
     userPhoto: string;
     username: string;
     creationAt: string;
@@ -43,17 +43,30 @@ export const PostProvider: React.FC<PostProvider> = ({ children }) => {
     // const [ likes, setLikes] = useState<Record<number, boolean>>({});
 
     const getPost = async () => {
+        setPosts([]);//borra la info del posts para evitar conflictos con los posts del perfil con el del home
         try {
             const res = await getPosts()
             setPosts(res.data)
-        } catch (error:any) {   
+        } catch (error: any) {
             console.error(error.response?.data?.message || "Error en traer los posts")
-        }finally{
+        } finally {
             setLoading(false)
         }
     }
 
-    const saveLike = async(postId:number) => {
+    const getPostProfile = async (userId: number) => {
+        setPosts([]);
+        try {
+            const res = await getPostsProfiles(userId)
+            setPosts(res.data)
+        } catch (error: any) {
+            console.error(error.response?.data?.message || "Error en traer los posts")
+        }finally {
+            setLoading(false)
+        }
+    }
+
+    const saveLike = async (postId: number) => {
         //console.log(postId)
         await postLikes(postId)
     }
@@ -68,7 +81,7 @@ export const PostProvider: React.FC<PostProvider> = ({ children }) => {
     }
 
     return (
-        <PostContext.Provider value={{ savePost, getPost, posts, saveLike, removeLike, loading }}>
+        <PostContext.Provider value={{ savePost, getPost, getPostProfile, posts, saveLike, removeLike, loading }}>
             {children}
         </PostContext.Provider>
     )

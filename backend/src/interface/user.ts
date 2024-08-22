@@ -7,6 +7,15 @@ export interface UserIdInterface extends Request {
     };
 }
 
+export interface UserIsExisting extends RowDataPacket {
+    id: number;
+    photo: string | null;
+    username: string;
+    email: string;
+    rol: string;
+    f_creation: Date;
+}
+
 export interface UserResultInterface extends RowDataPacket {
     id: number;
     photo: string;

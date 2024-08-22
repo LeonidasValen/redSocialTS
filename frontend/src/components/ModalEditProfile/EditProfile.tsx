@@ -102,7 +102,7 @@ export const EditProfile: React.FC<ModalProps> = ({ setModal, user }) => {
         <form className="mContent" onSubmit={handleSubmit}>
           <div className="mpPhoto">
             {user.photo
-              ? <img src={`./img/${user.photo}`} alt="" />
+              ? <img src={`/./img/${user.photo}`} alt="" />
               : <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-user-color-icon.png" alt="" id="iPhoto" />
             }
             <input type="file" accept=".png, .jpg, .jpeg" name="photo" onChange={handleFileChange} />

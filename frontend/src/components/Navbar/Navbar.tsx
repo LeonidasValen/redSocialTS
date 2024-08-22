@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
 import './navbar.css'
 import { useAuth } from '../../context/authContext'
+import { Search } from '../Search/Search';
 
 export function Navbar() {
 
@@ -28,6 +29,9 @@ export function Navbar() {
         <nav className='navbar'>
             <header className='nHeader'>
                 <h1 className="nLogo"><Link to={'/'}>LOGO</Link></h1>
+
+                <Search/>
+
                 <ul className="nItems">
                     {isAuthenticated
                         ? (

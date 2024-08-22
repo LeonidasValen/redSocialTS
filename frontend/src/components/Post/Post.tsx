@@ -103,9 +103,8 @@ export function Post() {
             }
             setErrors(null);
             getPost();
-        } catch (error) {
-            setErrors('Error al guardar el post. Inténtalo de nuevo más tarde.');
-            console.log(error)
+        } catch (error:any) {
+            setErrors(error?.response?.data?.message || "Error al guardar el post por favor intentelo de nuevo");
         }
     }
 

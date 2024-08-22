@@ -3,46 +3,54 @@ import { useAuth } from "../../context/authContext";
 import { useEffect, useState } from "react";
 import { EditProfile } from "../../components/ModalEditProfile/EditProfile";
 import './profile.css';
-import axios from "axios";
+import { Posts } from "../../components/Posts/Posts";
+import { usePost } from "../../context/postContext";
 
-interface Profile{
-    id: number;
-    email: string;
-    photo: string | null;
-    rol: string;
-    username: string;
-}
+
 
 export function Profile() {
-    const { user } = useAuth();
+    const { user, userProfile, getProfile } = useAuth();
+    const { getPostProfile } = usePost()
     const [modal, setModal] = useState<boolean>(false);
     const { userId } = useParams<{ userId: string }>();//si tienes problemas con el useparams recuarda que el error radica en las url ya sea el proxy o del axios
 
-    const [userProfile, setUserProfile] = useState<Profile | null>(null)
     const [loadingProfile, setLoadingProfile] = useState(true)
+    const [loadingPosts, setLoadingPosts] = useState(true)
 
     useEffect(() => {
-        if(userId){
+        if (userId) {
             const fetchProfile = async () => {
                 try {
-                    const res = await axios.get(`http://localhost:8000/user/profile/${userId}`)
-                    setUserProfile(res.data.user)
-                } catch (error) {
-                    console.error('Error fetching profile:', error);
-                }finally{
+                    await getProfile(Number(userId))
+                } catch (error: any) {
+                    console.error(error.response.data.message);
+                } finally {
                     setLoadingProfile(false)
                 }
             };
             fetchProfile();
         }
-
     }, [userId]);
+
+    useEffect(() => {
+        try {
+            getPostProfile(Number(userId))
+        }  catch (error:any) {   
+            console.error(error.response?.data?.message || "Error en traer los posts")
+        }finally{
+            setLoadingPosts(false)
+        }
+    }, [userId])
 
     if (!userProfile) {
         return <div>No se encontró el perfil</div>;
     }
 
     if (loadingProfile) {
+        return <h1>Cargando...</h1>;
+    }
+
+    if (loadingPosts) {
         return <h1>Cargando...</h1>;
     }
 
@@ -78,6 +86,10 @@ export function Profile() {
             {modal && user?.id === Number(userId) && (
                 <EditProfile setModal={setModal} user={user} />
             )}
+
+            <section className="postsProfile">
+                <Posts />
+            </section>
         </>
     );
 }

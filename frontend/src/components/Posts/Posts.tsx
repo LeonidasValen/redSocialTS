@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { IconComment, IconLike, IconOptions, IconReshare, IconShare, IconLiked } from '../../../public/icons/icons'
 import { usePost } from '../../context/postContext'
 import { useAuth } from '../../context/authContext'
@@ -11,6 +11,7 @@ moment.locale('es');
 
 interface Post {
     postId: number;
+    userId: number;
     userPhoto: string;
     username: string;
     creationAt: string;
@@ -29,18 +30,13 @@ interface LikeCounts {
 
 export function Posts() {
 
-    const { getPost, posts, saveLike, removeLike, loading } = usePost()
+    const { posts, saveLike, removeLike, loading } = usePost()
 
     const { isAuthenticated, user } = useAuth()
 
     const navigate = useNavigate()
 
     const [LikeCounts, setLikeCounts] = useState<LikeCounts>({});
-    //trae post
-    useEffect(() => {
-        getPost()
-    }, [])
-
 
     useEffect(() => {
         const updatedPostStates: LikeCounts = {};
@@ -104,15 +100,17 @@ export function Posts() {
                     posts.map((post: Post) => (
                         <div className='postConetent' key={post.postId}>
                             <div className="pProfile">
-                                {post?.userPhoto
-                                    ? <img src={`./img/${post.userPhoto}`} alt="" />
-                                    : <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-user-color-icon.png" alt="" />
-                                }
+                                <Link to={`/profile/${post.userId}`}>
+                                    {post?.userPhoto
+                                        ? <img src={`/./img/${post.userPhoto}`} alt="" />
+                                        : <img src="https://uxwing.com/wp-content/themes/uxwing/download/peoples-avatars/man-user-color-icon.png" alt="" />
+                                    }
+                                </Link>
                             </div>
                             <div className='pContent'>
                                 <div className="pHeader">
                                     <div className="pUser">
-                                        <span>{post.username} </span>
+                                        <Link to={`/profile/${post.userId}`}><span>{post.username} </span></Link>
                                         <p>• {moment(post.creationAt).locale('es').fromNow()}</p>
                                     </div>
                                     <button className='pOptions'>
@@ -123,7 +121,7 @@ export function Posts() {
                                 {post.images.length > 0 &&
                                     <div className={`pcImg ${post.images.length > 1 && ('colum')}`} >
                                         {post.images.map((img, index) => (
-                                            <img src={`./imgPost/${img}`} alt={`pImg ${index + 1}`} key={`pImg ${index}`} />
+                                            <img src={`/./imgPost/${img}`} alt={`pImg ${index + 1}`} key={`pImg ${index}`} />
                                         ))}
                                     </div>
                                 }

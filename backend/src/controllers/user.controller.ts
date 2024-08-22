@@ -1,23 +1,19 @@
 import connectToDB from "../db/db";
 import { Request, Response } from "express";
-import { UserIdInterface } from "../interface/user";
+import { UserIdInterface, UserIsExisting } from "../interface/user";
 import { RowDataPacket } from "mysql2";
 import fs from 'fs/promises';
 import path from "path";
 
-export interface UserResult extends RowDataPacket {
-    id: number;
-    photo: string;
-    username: string;
-    email: string;
-    rol: string;
-}
+type UserResult = Omit<UserIsExisting, 'f_creation' >
 
-interface ExistingUser extends RowDataPacket {
-    email: string;
-    username: string;
-    photo: string;
-}
+type GETExistingUser = Omit<UserIsExisting, 'f_creation'>
+
+type SearchExistingUser = Pick<UserIsExisting, 'id' | 'username' |'photo'>
+
+type UpdateUser = Omit<UserIsExisting, 'email' | 'f_creation' | 'rol'>;
+
+type DeleteUser = Pick<UserIsExisting, 'id' | 'photo'>;
 
 //trae los datos del usuario
 export const getUser = async (req: UserIdInterface, res: Response): Promise<void> => {
@@ -28,7 +24,7 @@ export const getUser = async (req: UserIdInterface, res: Response): Promise<void
 
         db = await connectToDB()
         // Verificar si se encontro al usuario
-        const [userSql] = await db.query<UserResult[]>("SELECT id, photo, username, email, rol FROM user WHERE id = ?", [userId]);
+        const [userSql] = await db.query<(GETExistingUser & RowDataPacket)[]>("SELECT id, photo, username, email, rol FROM user WHERE id = ?", [userId]);
         if (userSql.length === 0) {
             res.status(404).json({ message: 'Usuario no encontrado' });
             return
@@ -45,16 +41,37 @@ export const getUser = async (req: UserIdInterface, res: Response): Promise<void
     }
 }
 
+//traer usuario por buscador
+export const searchUsers = async (req: UserIdInterface, res: Response): Promise<void> => {
+    const { searchUser = '' } = req.query as { searchUser: string };
+
+    let db;
+    try {
+        // Conectar a la base de datos
+        db = await connectToDB();
+
+        // devulven todos los usuarios registrados
+        const [users] = await db.query<(SearchExistingUser & RowDataPacket)[]>("SELECT id, photo, username FROM user WHERE username LIKE ?  LIMIT ?", [ `%${searchUser}%`, 10]);
+        //console.log(users)
+        res.status(200).json({ users});
+    } catch (error) {
+        console.error('Error al obtener los usuarios:', error);
+        res.status(500).json({ message: 'Error al obtener los usuarios', });
+    } finally {
+        if (db) { db.release(); }
+    }
+}
+
+// trae el perfil del usuario
 export const getProfile = async (req: Request, res: Response): Promise<void> => {
     //trae el id del usurio del validateToken
     const userId = req.params.id
-    console.log(userId)
     let db;
     try {
 
         db = await connectToDB()
         // Verificar si se encontro al usuario
-        const [userSql] = await db.query<UserResult[]>("SELECT id, photo, username, email, rol FROM user WHERE id = ?", [userId]);
+        const [userSql] = await db.query<(UserResult & RowDataPacket)[]>("SELECT id, photo, username, email, rol FROM user WHERE id = ?", [userId]);
         if (userSql.length === 0) {
             res.status(404).json({ message: 'Usuario no encontrado' });
             return
@@ -86,17 +103,19 @@ export const updateUser = async (req: UserIdInterface, res: Response) => {
         //conectar la base de datos
         db = await connectToDB()
 
-        const [userUpdate] = await db.query<ExistingUser[]>("SELECT id, photo FROM user WHERE id = ?", [userId]);
+        const [userUpdate] = await db.query<(UpdateUser & RowDataPacket)[]>("SELECT id, photo FROM user WHERE id = ?", [userId]);
         if (userUpdate.length === 0) return res.status(404).json({ message: 'Usuario no encontrado' });
 
         const oldPhoto = userUpdate[0].photo;
         // Verificar si se debe eliminar la foto antigua
-        if (oldPhoto && (req.body.photo === "null" || req.body.photo === null || cover)) {
+        if (oldPhoto && (cover || req.body.photo === "null")) {
             const filePath = path.join(__dirname, `./../../../frontend/public/img/${oldPhoto}`);
             try {
                 await fs.unlink(filePath);
             } catch (err) {
                 console.error('Error al eliminar la foto antigua:', err);
+                res.status(400).json({ message: 'Error al eliminar la foto' });
+                return
             }
         }
         // Actualizar el usuario en la base de datos
@@ -126,7 +145,7 @@ export const deleteUser = async (req: UserIdInterface, res: Response): Promise<v
         db = await connectToDB();
 
         // Verificar si el usuario existe
-        const [userDelete] = await db.query<ExistingUser[]>("SELECT id, photo FROM user WHERE id = ?", [userId]);
+        const [userDelete] = await db.query<(DeleteUser & RowDataPacket)[]>("SELECT id, photo FROM user WHERE id = ?", [userId]);
         if (userDelete.length === 0) {
             res.status(404).json({ message: 'Usuario no encontrado' });
             return;
