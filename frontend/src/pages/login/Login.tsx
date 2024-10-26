@@ -62,7 +62,7 @@ export function Login() {
       await signIn(formData)
       navigate("/")
     } catch (error: any) {
-      //console.error(error?.response?.data)
+      console.error(error)
       setErrors({ general: error?.response?.data?.message || "Error al iniciar sesión, por favor inténtelo de nuevo" })
       setErrorBackend(error?.response?.data?.error || [])
     }

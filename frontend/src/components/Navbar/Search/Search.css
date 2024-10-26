@@ -46,6 +46,7 @@
     top: 3rem;
     width: 100%;
     box-shadow: 0px 2px 5px #1e1e1e55;
+    overflow: hidden;
     border-radius: 10px;
     z-index: 10;
 }
@@ -59,15 +60,20 @@
     display: flex;
     align-items: center;
     justify-content: start;
-    padding: 10px 6px;
+    width: 100%;
+}
+.SRContent li:not(:last-child) {
+    border-bottom: 1px solid black;
+}
+.SRContent li:hover{
+    background: #e4e4e4;
 }
 .SRContent li a{
     display: flex;
     align-items: center;
     justify-content: start;
-}
-.SRContent li:not(:last-child) {
-    border-bottom: 1px solid black;
+    width: 100%;
+    padding: 10px 6px;
 }
 
 .SRContent li span{

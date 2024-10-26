@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
-import { Post } from '../../components/Post/Post'
-import { Posts } from '../../components/Posts/Posts'
+import { Post } from '../../components/home/Post/Post'
+import { Posts } from '../../components/home/Posts/Posts'
 import './home.css'
 import { usePost } from '../../context/postContext'
 

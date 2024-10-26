@@ -1,11 +1,10 @@
 import { useParams } from "react-router-dom";
-import { useAuth } from "../../context/authContext";
 import { useEffect, useState } from "react";
-import { EditProfile } from "../../components/ModalEditProfile/EditProfile";
-import './profile.css';
-import { Posts } from "../../components/Posts/Posts";
+import { useAuth } from "../../context/authContext";
 import { usePost } from "../../context/postContext";
-
+import { EditProfile } from "../../components/profile/ModalEditProfile/EditProfile";
+import { Posts } from "../../components/home/Posts/Posts";
+import './profile.css';
 
 
 export function Profile() {

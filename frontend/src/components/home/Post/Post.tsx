@@ -1,7 +1,8 @@
 import { ChangeEvent, FormEvent, useRef, useState } from 'react'
-import { useAuth } from '../../context/authContext'
-import { usePost } from '../../context/postContext';
-import { IconImg } from '../../../public/icons/icons';
+import { useAuth } from '../../../context/authContext';
+import { usePost } from '../../../context/postContext';
+import { IconImg } from '../../../../public/icons/icons';
+
 import './post.css'
 
 interface FormDataState {

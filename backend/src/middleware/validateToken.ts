@@ -16,7 +16,7 @@ interface CustomRequestPost extends Request {
     user?: JwtPayload | null; // El tipo de `user` puede ser JwtPayload o null
 }
 
-
+//valida que tenga un token
 export const validateToken = (req: CustomRequest, res: Response, next: NextFunction): Response | void => {
     const token = req.cookies.token;
 
@@ -31,6 +31,7 @@ export const validateToken = (req: CustomRequest, res: Response, next: NextFunct
     });
 };
 
+//en caso de un modificacion de un perfil o posts se valida si coincide el id del token con el id a modificar del perfil o posts
 export const verifyUser = (req: CustomRequestUser, res: Response, next: NextFunction): Response | void => {
     validateToken(req, res, ()=>{
         const userIdFromParams = parseInt(req.params.id);
@@ -42,6 +43,7 @@ export const verifyUser = (req: CustomRequestUser, res: Response, next: NextFunc
     })
 };
 
+//se valida el token del usuario para averiguar a la hora de traer los posts si le dio like o un comentario al post
 export const validatePost = (req: CustomRequestPost, res: Response, next: NextFunction): Response | void => {
     const token = req.cookies.token;
 

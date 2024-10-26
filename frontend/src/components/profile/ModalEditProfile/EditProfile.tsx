@@ -1,6 +1,6 @@
 import { useState, ChangeEvent, FormEvent, Dispatch, SetStateAction } from 'react';
-import { useAuth } from '../../context/authContext';
-import { IconDeleted } from '../../../public/icons/icons';
+import { useAuth } from '../../../context/authContext';
+import { IconDeleted } from '../../../../public/icons/icons';
 import './editProfile.css';
 
 interface User {

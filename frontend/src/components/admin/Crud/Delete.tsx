@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { useAdmin, User } from "../../context/adminContent";
+import { useAdmin, User } from "../../../context/adminContent";
+
 
 interface DeleteInterface{
   selectedUsers: User | null;

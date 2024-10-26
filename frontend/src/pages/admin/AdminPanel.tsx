@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { useAdmin, User } from "../../context/adminContent";
 import { useAuth } from "../../context/authContext";
 import { Navigate } from "react-router-dom";
-import { Search } from "../../components/Crud/Search";
-import { Table } from "../../components/Crud/Table";
-import { Pagination } from "../../components/Crud/Pagination";
-import { Edit } from "../../components/Crud/Edit";
-import { Delete } from "../../components/Crud/Delete";
+
 
 import './adminPanel.css'
+import { Search } from "../../components/admin/Crud/Search";
+import { Table } from "../../components/admin/Crud/Table";
+import { Pagination } from "../../components/admin/Crud/Pagination";
+import { Edit } from "../../components/admin/Crud/Edit";
+import { Delete } from "../../components/admin/Crud/Delete";
 
 export function AdminPanel() {
     const { isAuthenticated, user } = useAuth()

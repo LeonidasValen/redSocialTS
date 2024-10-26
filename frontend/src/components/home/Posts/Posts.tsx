@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { IconComment, IconLike, IconOptions, IconReshare, IconShare, IconLiked } from '../../../public/icons/icons'
-import { usePost } from '../../context/postContext'
-import { useAuth } from '../../context/authContext'
+import { IconComment, IconLike, IconOptions, IconReshare, IconShare, IconLiked } from '../../../../public/icons/icons'
+import { usePost } from '../../../context/postContext'
+import { useAuth } from '../../../context/authContext'
 import moment from 'moment'
 import 'moment/locale/es'
 import './posts.css'
@@ -50,7 +50,7 @@ export function Posts() {
     }, [posts]);
 
     const handleLike = async (postId: number) => {
-        if (!isAuthenticated && user) {
+        if (!isAuthenticated && !user) {
             navigate('/login')
             return;
         }
@@ -70,7 +70,7 @@ export function Posts() {
     }
 
     const handleDisLike = async (postId: number) => {
-        if (!isAuthenticated) {
+        if (!isAuthenticated && !user) {
             navigate('/login')
             return;
         }

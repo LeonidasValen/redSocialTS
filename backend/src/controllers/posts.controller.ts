@@ -27,47 +27,46 @@ interface PostId extends RowDataPacket {
 export const post = async (req: UserIdInterface, res: Response): Promise<void> => {
     const userId = req.user?.userId;
     const descrip = req.body.descrip;
-    let cover: string[] = [];
-    let db;
-    try {
 
+    let cover: string[] = [];
+    try {
         if (req.files && Array.isArray(req.files)) {
             cover = req.files.map(file => file.filename);
         }
-        db = await connectToDB();
+
+        if (cover.length === 0 && !descrip) {
+            res.status(400).json({ message: 'Debes agregar algún contenido, ya sea descripción o imágenes.' });
+            return;
+        }
 
         // Verificar si el usuario existe
-        const [userUpdate] = await db.query<ExistingUser[]>("SELECT id FROM user WHERE id = ?", [userId]);
+        const [userUpdate] = await req.db!.query<ExistingUser[]>("SELECT id FROM user WHERE id = ?", [userId]);
         if (userUpdate.length === 0) {
             res.status(404).json({ message: 'Usuario no encontrado' });
             return
         }
         // Insertar el post
-        const [postInsertResult] = await db.query<ResultSetHeader>("INSERT INTO posts (`desc`, userId) VALUES (?, ?)", [descrip, userId]);
+        const [postInsertResult] = await req.db!.query<ResultSetHeader>("INSERT INTO posts (`desc`, userId) VALUES (?, ?)", [descrip, userId]);
         const postId = postInsertResult.insertId;
 
         // Insertar las imágenes asociadas al post
         if (cover.length > 0) {
             const imgPostsValues = cover.map(filename => [filename, postId]);
-            await db.query("INSERT INTO imgposts (img, postId) VALUES ?", [imgPostsValues]);
+            await req.db!.query("INSERT INTO imgposts (img, postId) VALUES ?", [imgPostsValues]);
         }
 
         res.status(200).json({ message: 'Post guardado' });
     } catch (error) {
         console.error('Error al guardar el post:', error);
         res.status(500).json({ message: 'Error en el servidor al guardar el post' });
-    } finally {
-        if (db) db.release();
     }
 }
 
 export const getPosts = async (req: UserIdInterface, res: Response): Promise<void> => {
     const userId = req.user?.userId || null; // Si el usuario está autenticado, obtiene su ID
-    let db;
     try {
-        db = await connectToDB();
 
-        const [results] = await db.query<PostRow[]>(`
+        const [results] = await req.db!.query<PostRow[]>(`
             SELECT 
                 posts.id AS postId, 
                 posts.desc, 
@@ -92,41 +91,53 @@ export const getPosts = async (req: UserIdInterface, res: Response): Promise<voi
                 posts.creationAt DESC;
         `, [userId]);
 
-        const posts = results.map(row => ({
-            postId: row.postId,
-            desc: row.desc,
-            creationAt: row.creationAt,
-            userId: row.userId,
-            username: row.username,
-            userPhoto: row.photo,
-            images: row.images ? row.images.split(',') : [],
-            likeCount: row.likeCount,
-            hasLiked: Boolean(row.hasLiked) // Convierte 0 o 1 a booleano
-        }));
+        // Procesar los resultados y calcular el puntaje de relevancia
+        const posts = results.map(row => {
+            const ageInDays = (new Date().getTime() - new Date(row.creationAt).getTime()) / (1000 * 60 * 60 * 24);
+
+            // Ponderación básica
+            const relevanceScore =
+                row.likeCount * 2 +  // Ponderación de los likes
+                (row.hasLiked ? 5 : 0) -  // Bonificación si el usuario ha dado "like"
+                ageInDays;  // Penalización por antigüedad (publicaciones más antiguas tienen menos relevancia)
+
+            return {
+                postId: row.postId,
+                desc: row.desc,
+                creationAt: row.creationAt,
+                userId: row.userId,
+                username: row.username,
+                userPhoto: row.photo,
+                images: row.images ? row.images.split(',') : [],
+                likeCount: row.likeCount,
+                hasLiked: Boolean(row.hasLiked),
+                relevanceScore // Agrega el puntaje de relevancia
+            };
+        });
+
+        // Ordenar las publicaciones por el puntaje de relevancia
+        posts.sort((a, b) => b.relevanceScore - a.relevanceScore);
 
         res.status(200).json(posts);
 
     } catch (error) {
         console.error('Error al traer los posts con likes:', error);
         res.status(500).json({ message: 'Error en el servidor al obtener los posts con likes' });
-    } finally {
-        if (db) db.release();
     }
 }
 
 //trae el post de un usuario
 export const getPostsUsers = async (req: UserIdInterface, res: Response): Promise<void> => {
     const userIdProfile = req.params?.id; // Si el usuario está autenticado, obtiene su ID
-    const userId = req.user?.userId || null; 
-    let db;
+    const userId = req.user?.userId || null;
+
     if (!userIdProfile) {
         res.status(400).json({ message: 'El ID del perfil no es valido' });
         return;
     }
     try {
-        db = await connectToDB();
 
-        const [results] = await db.query<PostRow[]>(`
+        const [results] = await req.db!.query<PostRow[]>(`
             SELECT 
                 posts.id AS postId, 
                 posts.desc, 
@@ -150,7 +161,7 @@ export const getPostsUsers = async (req: UserIdInterface, res: Response): Promis
             GROUP BY 
                 posts.id, posts.desc, posts.userId, posts.creationAt, user.username, user.photo
             ORDER BY 
-                posts.creationAt DESC ;
+                posts.creationAt DESC;
         `, [userId, userIdProfile]);
 
         const posts = results.map(row => ({
@@ -170,8 +181,6 @@ export const getPostsUsers = async (req: UserIdInterface, res: Response): Promis
     } catch (error) {
         console.error('Error al traer los posts con likes:', error);
         res.status(500).json({ message: 'Error en el servidor al obtener los posts con likes' });
-    } finally {
-        if (db) db.release();
     }
 }
 
@@ -210,7 +219,7 @@ export const dislike = async (req: UserIdInterface, res: Response): Promise<void
     let db;
     const userId = req.user?.userId;
     const { postId } = req.params;
-    console.log(userId,postId)
+    console.log(userId, postId)
 
     try {
         db = await connectToDB();

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
-import './navbar.css'
+import { Search } from './Search/Search';
 import { useAuth } from '../../context/authContext'
-import { Search } from '../Search/Search';
+import './navbar.css'
 
 export function Navbar() {
 

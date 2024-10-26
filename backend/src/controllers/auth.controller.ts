@@ -17,26 +17,22 @@ interface TokenResult extends RowDataPacket {
 //Register
 export const register = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { username, email, password } = req.body
-    let db
     try {
-        db = await connectToDB()
+        const db = await connectToDB()
 
         //verifica si el usuario esta registrado
         const [existingUser] = await db.query<ExistingUser[]>(
             "SELECT email, username FROM user WHERE email = ? OR username = ?", [email, username]
         )
         if (existingUser.length > 0) {
-            const user = existingUser[0];
-            if (user.email === email && user.username === username) {
-                res.status(409).json({ message: "El Correo y el Nombre del usuario ya están registrados" });
-                return;
-            } else if (user.email === email) {
-                res.status(409).json({ message: "El Correo ya está registrado" });
-                return;
-            } else if (user.username === username) {
-                res.status(409).json({ message: "El Nombre de usuario ya está registrado" });
-                return;
-            }
+            const { email: existingEmail, username: existingUsername } = existingUser[0];
+            const message = existingEmail === email && existingUsername === username
+                ? "El Correo y el Nombre del usuario ya están registrados"
+                : existingEmail === email
+                    ? "El Correo ya está registrado"
+                    : "El Nombre de usuario ya está registrado";
+            res.status(409).json({ message });
+            return;
         }
 
         //encripta la contaseña
@@ -57,33 +53,25 @@ export const register = async (req: Request, res: Response, next: NextFunction):
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: "Error en el servidor al registrarse" })
-    } finally {
-        if (db) { db.release(); }
     }
 }
 
 //Login
 export const login = async (req: Request, res: Response): Promise<void> => {
     const { email, password } = req.body;
-    let db;
+
     try {
-        db = await connectToDB();
         //verifica que el correo este registrado
-        const [sql] = await db.query<UserResultInterface[]>("SELECT * FROM user WHERE email = ?", [email])
-        if (sql.length === 0) {
-            res.status(404).json({ message: 'Correo o contraseña icorrecto' })
-            return
-        }
+        const [sql] = await req.db!.query<UserResultInterface[]>("SELECT * FROM user WHERE email = ?", [email])
         //verifica si las contraseñas coinciden
         const user = sql[0];//guarda los datos del usuario obtenidos
-        const passCompare = await bcrypt.compare(password, user.password)
-        if (!passCompare) {
-            res.status(404).json({ message: 'Correo o contraseña icorrecto' })
-            return
+        if (!sql.length || !(await bcrypt.compare(password, user.password))) {
+            res.status(404).json({ message: 'Correo o contraseña incorrecto' });
+            return;
         }
         //crea la cookie
         const token = await createJWT({ userId: user.id })
-        res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 7*24*60*60*1000 })//envia la cookie con los metodos de seguridad
+        res.cookie('token', token, { httpOnly: true, secure: true, sameSite: 'strict', maxAge: 7 * 24 * 60 * 60 * 1000 })//envia la cookie con los metodos de seguridad
 
         res.status(201).json({
             id: user.id,
@@ -96,8 +84,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
         res.status(500).json({ message: 'Error en el servidor al iniciar sesión' });
-    } finally {
-        if (db) { db.release(); }
     }
 }
 

@@ -1,6 +1,7 @@
 import { ChangeEvent, Dispatch, FormEvent, SetStateAction, useState } from 'react';
-import { useAdmin } from '../../context/adminContent';
-import { IconDeleted } from '../../../public/icons/icons';
+import { useAdmin } from '../../../context/adminContent';
+import { IconDeleted } from '../../../../public/icons/icons';
+
 
 export interface User {
   id: number;

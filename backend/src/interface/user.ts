@@ -5,6 +5,11 @@ export interface UserIdInterface extends Request {
     user?: {
         userId: number; // Ajusta el tipo según la estructura real de `user`
     };
+    query: {
+        horario?: string | string[]; // Los parámetros pueden ser un string o un array
+        nivel?: string | string[];
+        tipo?: string  | string[];
+    };
 }
 
 export interface UserIsExisting extends RowDataPacket {

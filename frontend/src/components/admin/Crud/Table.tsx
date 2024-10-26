@@ -1,5 +1,5 @@
-import { User } from '../../context/adminContent';
-import { IconArrows, IconDeleted, IconEdit } from '../../../public/icons/icons';
+import { User } from '../../../context/adminContent';
+import { IconArrows, IconDeleted, IconEdit } from '../../../../public/icons/icons';
 import moment from 'moment'
 import 'moment/locale/es';
 import './table.css'
@@ -55,7 +55,7 @@ export function Table({ users, handleEdit, handleDelete }: TableProps) {
                                 <td>{moment(user.f_creation).locale('es').format('DD-MM-YYYY HH:mm:ss')}</td>
                                 <td className="action-trash">
                                     <button onClick={() => handleDelete(user.id)}>
-                                        <IconDeleted />
+                                        <IconDeleted/>
                                     </button>
                                 </td>
                                 <td className="action-edit">

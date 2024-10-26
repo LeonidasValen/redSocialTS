@@ -1,7 +1,8 @@
 import { Dispatch, SetStateAction, useCallback, useEffect } from "react";
-import { useAdmin } from "../../context/adminContent";
-import { useDebounce } from "../../hooks/useDebouce";  // Asegúrate de ajustar la ruta según tu estructura de carpetas
-import { IconSearch } from "../../../public/icons/icons";
+import { useDebounce } from "../../../hooks/useDebouce";
+import { useAdmin } from "../../../context/adminContent";
+import { IconSearch } from "../../../../public/icons/icons";
+
 
 interface Searching{
     limit: number; 

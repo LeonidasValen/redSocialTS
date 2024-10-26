@@ -94,7 +94,6 @@ export const updateUser = async (req: UserIdInterface, res: Response) => {
     try {
         const userId = req.user?.userId;
         const { username } = req.body;
-        if (!userId) { res.status(401).json({ message: 'No estas autorizado' }); return; }
 
         let cover = null;
         if (req.file) {
